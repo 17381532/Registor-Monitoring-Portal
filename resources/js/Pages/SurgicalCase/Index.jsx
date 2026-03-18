@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function SurgicalCaseIndex({ cases, fbUs, filters }) {
     const [search, setSearch] = useState(filters?.search || '');
@@ -40,6 +43,44 @@ export default function SurgicalCaseIndex({ cases, fbUs, filters }) {
         return new Date(dateString).toLocaleString();
     };
 
+    const getExportRows = () =>
+        cases.data.map((caseItem) => ({
+            'Case #': caseItem.case_number,
+            Patient: caseItem.patient_name,
+            FBU: caseItem.fbu?.name || '',
+            Status: caseItem.status.replace('_', ' '),
+            'Scheduled Time': formatDate(caseItem.scheduled_start_time),
+            Surgeon: caseItem.surgeon_name || '',
+            'Performance Score': caseItem.performance_score ? caseItem.performance_score.toFixed(1) : '',
+        }));
+
+    const exportToExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(getExportRows());
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Cases');
+
+        const filename = `surgical-cases-${new Date().toISOString().slice(0, 10)}.xlsx`;
+        XLSX.writeFile(workbook, filename);
+    };
+
+    const exportToPdf = () => {
+        const doc = new jsPDF();
+        const rows = getExportRows();
+        const headers = rows.length ? Object.keys(rows[0]) : [];
+
+        doc.text('Surgical Cases', 14, 16);
+        doc.autoTable({
+            startY: 22,
+            head: [headers],
+            body: rows.map((row) => headers.map((key) => row[key])),
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [30, 41, 59] },
+        });
+
+        const filename = `surgical-cases-${new Date().toISOString().slice(0, 10)}.pdf`;
+        doc.save(filename);
+    };
+
     return (
         <AuthenticatedLayout
             header={<h2 className="font-semibold text-xl text-gray-800">Surgical Cases</h2>}
@@ -49,14 +90,35 @@ export default function SurgicalCaseIndex({ cases, fbUs, filters }) {
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {/* Header */}
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold">Surgical Cases Monitoring</h1>
-                        <Link
-                            href={route('surgical-case.create')}
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                        >
-                            Create Case
-                        </Link>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                        <div>
+                            <h1 className="text-2xl font-bold">Surgical Cases Monitoring</h1>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 items-center">
+                            <button
+                                type="button"
+                                onClick={exportToExcel}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                            >
+                                Export XLSX
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={exportToPdf}
+                                className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700"
+                            >
+                                Export PDF
+                            </button>
+
+                            <Link
+                                href={route('surgical-case.create')}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                                Create Case
+                            </Link>
+                        </div>
                     </div>
 
                     {/* Filters */}
