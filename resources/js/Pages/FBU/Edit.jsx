@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
+import React from 'react';
+import { useForm, Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
 
 export default function FBUEdit({ fbu }) {
-    const { data, setData, patch, errors, processing } = useForm({
-        name: fbu.name,
-        code: fbu.code,
+    const { data, setData, put, errors, processing } = useForm({
+        name: fbu.name || '',
+        code: fbu.code || '',
         description: fbu.description || '',
-        status: fbu.status,
+        status: fbu.status || 'active',
     });
 
     const handleChange = (e) => {
@@ -18,14 +17,14 @@ export default function FBUEdit({ fbu }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        patch(route('fbu.update', fbu.id));
+        put(route('fbu.update', fbu.id));
     };
 
     return (
         <AuthenticatedLayout
             header={<h2 className="font-semibold text-xl text-gray-800">Edit FBU</h2>}
         >
-            <Head title={`Edit ${fbu.name}`} />
+            <Head title="Edit FBU" />
 
             <div className="py-12">
                 <div className="max-w-2xl mx-auto sm:px-6 lg:px-8">
@@ -33,7 +32,9 @@ export default function FBUEdit({ fbu }) {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Name */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-900">FBU Name *</label>
+                                <label className="block text-sm font-medium text-gray-900">
+                                    FBU Name <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     name="name"
@@ -51,7 +52,9 @@ export default function FBUEdit({ fbu }) {
 
                             {/* Code */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-900">Code *</label>
+                                <label className="block text-sm font-medium text-gray-900">
+                                    Code <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     name="code"
@@ -69,7 +72,9 @@ export default function FBUEdit({ fbu }) {
 
                             {/* Description */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-900">Description</label>
+                                <label className="block text-sm font-medium text-gray-900">
+                                    Description
+                                </label>
                                 <textarea
                                     name="description"
                                     value={data.description}
@@ -82,7 +87,9 @@ export default function FBUEdit({ fbu }) {
 
                             {/* Status */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-900">Status *</label>
+                                <label className="block text-sm font-medium text-gray-900">
+                                    Status <span className="text-red-500">*</span>
+                                </label>
                                 <select
                                     name="status"
                                     value={data.status}
@@ -103,7 +110,7 @@ export default function FBUEdit({ fbu }) {
                             {/* Buttons */}
                             <div className="flex gap-4 pt-6 border-t">
                                 <a
-                                    href={route('fbu.show', fbu.id)}
+                                    href={route('fbu.index')}
                                     className="flex-1 text-center px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
                                 >
                                     Cancel

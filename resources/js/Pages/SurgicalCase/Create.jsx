@@ -1,20 +1,20 @@
 import React from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
 
-export default function SurgicalCaseCreate({ fbUs }) {
+export default function SurgicalCaseCreate({ fbunits }) {
     const { data, setData, post, errors, processing } = useForm({
-        fbu_id: '',
-        case_number: '',
         patient_name: '',
-        procedure_description: '',
-        status: 'scheduled',
+        patient_id: '',
+        procedure_name: '',
+        procedure_code: '',
+        fbu_id: '',
         scheduled_start_time: '',
         scheduled_end_time: '',
-        estimated_duration_minutes: '',
-        surgeon_name: '',
-        anesthetist_name: '',
+        surgeon: '',
+        anesthesiologist: '',
+        notes: '',
+        status: 'scheduled'
     });
 
     const handleChange = (e) => {
@@ -33,198 +33,226 @@ export default function SurgicalCaseCreate({ fbUs }) {
         >
             <Head title="Create Surgical Case" />
 
-            <div className="py-12 bg-gray-50 min-h-screen">
-                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
-                    <div className="mb-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="text-2xl font-semibold text-gray-900">New Surgical Case</h1>
-                                <p className="mt-1 text-sm text-gray-600">Add a new case and schedule the operating room.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            <div className="py-12">
+                <div className="max-w-3xl mx-auto sm:px-6 lg:px-8">
+                    <div className="bg-white rounded-lg shadow p-8">
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 uppercase">FBU <span className="text-red-500">*</span></label>
-                                    <select
-                                        name="fbu_id"
-                                        value={data.fbu_id}
-                                        onChange={handleChange}
-                                        className={`mt-2 w-full px-4 py-2 bg-white border rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                                            errors.fbu_id ? 'border-red-400' : 'border-gray-200'
-                                        }`}
-                                    >
-                                        <option value="">Select FBU</option>
-                                        {fbUs.map((fbu) => (
-                                            <option key={fbu.id} value={fbu.id}>
-                                                {fbu.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.fbu_id && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.fbu_id}</p>
-                                    )}
-                                </div>
+                            {/* Patient Information */}
+                            <div className="border-b border-gray-200 pb-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">Patient Information</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">Patient Name *</label>
+                                        <input
+                                            type="text"
+                                            name="patient_name"
+                                            value={data.patient_name}
+                                            onChange={handleChange}
+                                            className={`mt-1 w-full px-4 py-2 border rounded-lg ${
+                                                errors.patient_name ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="Enter patient name"
+                                        />
+                                        {errors.patient_name && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.patient_name}</p>
+                                        )}
+                                    </div>
 
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 uppercase">Case Number <span className="text-red-500">*</span></label>
-                                    <input
-                                        type="text"
-                                        name="case_number"
-                                        value={data.case_number}
-                                        onChange={handleChange}
-                                        className={`mt-2 w-full px-4 py-2 bg-white border rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                                            errors.case_number ? 'border-red-400' : 'border-gray-200'
-                                        }`}
-                                        placeholder="e.g., CS-2025-001"
-                                    />
-                                    {errors.case_number && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.case_number}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 uppercase">Patient Name <span className="text-red-500">*</span></label>
-                                    <input
-                                        type="text"
-                                        name="patient_name"
-                                        value={data.patient_name}
-                                        onChange={handleChange}
-                                        className={`mt-2 w-full px-4 py-2 bg-white border rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                                            errors.patient_name ? 'border-red-400' : 'border-gray-200'
-                                        }`}
-                                        placeholder="Enter patient name"
-                                    />
-                                    {errors.patient_name && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.patient_name}</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 uppercase">Status <span className="text-red-500">*</span></label>
-                                    <select
-                                        name="status"
-                                        value={data.status}
-                                        onChange={handleChange}
-                                        className={`mt-2 w-full px-4 py-2 bg-white border rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                                            errors.status ? 'border-red-400' : 'border-gray-200'
-                                        }`}
-                                    >
-                                        <option value="scheduled">Scheduled</option>
-                                        <option value="in_progress">In Progress</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="cancelled">Cancelled</option>
-                                        <option value="postponed">Postponed</option>
-                                    </select>
-                                    {errors.status && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.status}</p>
-                                    )}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">Patient ID *</label>
+                                        <input
+                                            type="text"
+                                            name="patient_id"
+                                            value={data.patient_id}
+                                            onChange={handleChange}
+                                            className={`mt-1 w-full px-4 py-2 border rounded-lg ${
+                                                errors.patient_id ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="Enter patient ID"
+                                        />
+                                        {errors.patient_id && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.patient_id}</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
+                            {/* Procedure Information */}
+                            <div className="border-b border-gray-200 pb-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">Procedure Information</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">Procedure Name *</label>
+                                        <input
+                                            type="text"
+                                            name="procedure_name"
+                                            value={data.procedure_name}
+                                            onChange={handleChange}
+                                            className={`mt-1 w-full px-4 py-2 border rounded-lg ${
+                                                errors.procedure_name ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="Enter procedure name"
+                                        />
+                                        {errors.procedure_name && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.procedure_name}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">Procedure Code</label>
+                                        <input
+                                            type="text"
+                                            name="procedure_code"
+                                            value={data.procedure_code}
+                                            onChange={handleChange}
+                                            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                            placeholder="Enter procedure code"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">FBU *</label>
+                                        <select
+                                            name="fbu_id"
+                                            value={data.fbu_id}
+                                            onChange={handleChange}
+                                            className={`mt-1 w-full px-4 py-2 border rounded-lg ${
+                                                errors.fbu_id ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                        >
+                                            <option value="">Select FBU</option>
+                                            {fbunits.map(fbu => (
+                                                <option key={fbu.id} value={fbu.id}>{fbu.name} ({fbu.code})</option>
+                                            ))}
+                                        </select>
+                                        {errors.fbu_id && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.fbu_id}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">Status</label>
+                                        <select
+                                            name="status"
+                                            value={data.status}
+                                            onChange={handleChange}
+                                            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                        >
+                                            <option value="scheduled">Scheduled</option>
+                                            <option value="in_progress">In Progress</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="cancelled">Cancelled</option>
+                                            <option value="postponed">Postponed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Schedule Information */}
+                            <div className="border-b border-gray-200 pb-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">Schedule Information</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">Start Time *</label>
+                                        <input
+                                            type="datetime-local"
+                                            name="scheduled_start_time"
+                                            value={data.scheduled_start_time}
+                                            onChange={handleChange}
+                                            className={`mt-1 w-full px-4 py-2 border rounded-lg ${
+                                                errors.scheduled_start_time ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                        />
+                                        {errors.scheduled_start_time && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.scheduled_start_time}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">End Time *</label>
+                                        <input
+                                            type="datetime-local"
+                                            name="scheduled_end_time"
+                                            value={data.scheduled_end_time}
+                                            onChange={handleChange}
+                                            className={`mt-1 w-full px-4 py-2 border rounded-lg ${
+                                                errors.scheduled_end_time ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                        />
+                                        {errors.scheduled_end_time && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.scheduled_end_time}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Medical Team */}
+                            <div className="border-b border-gray-200 pb-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">Medical Team</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">Surgeon *</label>
+                                        <input
+                                            type="text"
+                                            name="surgeon"
+                                            value={data.surgeon}
+                                            onChange={handleChange}
+                                            className={`mt-1 w-full px-4 py-2 border rounded-lg ${
+                                                errors.surgeon ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="Enter surgeon name"
+                                        />
+                                        {errors.surgeon && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.surgeon}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-900">Anesthesiologist *</label>
+                                        <input
+                                            type="text"
+                                            name="anesthesiologist"
+                                            value={data.anesthesiologist}
+                                            onChange={handleChange}
+                                            className={`mt-1 w-full px-4 py-2 border rounded-lg ${
+                                                errors.anesthesiologist ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="Enter anesthesiologist name"
+                                        />
+                                        {errors.anesthesiologist && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.anesthesiologist}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Notes */}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 uppercase">Procedure Description</label>
+                                <label className="block text-sm font-medium text-gray-900">Notes</label>
                                 <textarea
-                                    name="procedure_description"
-                                    value={data.procedure_description}
+                                    name="notes"
+                                    value={data.notes}
                                     onChange={handleChange}
-                                    className="mt-2 w-full px-4 py-3 bg-white border rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                    placeholder="Enter procedure details"
                                     rows="4"
+                                    className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                    placeholder="Enter any additional notes"
                                 ></textarea>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 uppercase">Scheduled Start</label>
-                                    <input
-                                        type="datetime-local"
-                                        name="scheduled_start_time"
-                                        value={data.scheduled_start_time}
-                                        onChange={handleChange}
-                                        className={`mt-2 w-full px-4 py-2 bg-white border rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                                            errors.scheduled_start_time ? 'border-red-400' : 'border-gray-200'
-                                        }`}
-                                    />
-                                    {errors.scheduled_start_time && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.scheduled_start_time}</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 uppercase">Scheduled End</label>
-                                    <input
-                                        type="datetime-local"
-                                        name="scheduled_end_time"
-                                        value={data.scheduled_end_time}
-                                        onChange={handleChange}
-                                        className={`mt-2 w-full px-4 py-2 bg-white border rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                                            errors.scheduled_end_time ? 'border-red-400' : 'border-gray-200'
-                                        }`}
-                                    />
-                                    {errors.scheduled_end_time && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.scheduled_end_time}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 uppercase">Surgeon Name</label>
-                                    <input
-                                        type="text"
-                                        name="surgeon_name"
-                                        value={data.surgeon_name}
-                                        onChange={handleChange}
-                                        className="mt-2 w-full px-4 py-2 bg-white border rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                        placeholder="Enter surgeon name"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 uppercase">Anesthetist Name</label>
-                                    <input
-                                        type="text"
-                                        name="anesthetist_name"
-                                        value={data.anesthetist_name}
-                                        onChange={handleChange}
-                                        className="mt-2 w-full px-4 py-2 bg-white border rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                        placeholder="Enter anesthetist name"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 uppercase">Estimated Duration (minutes)</label>
-                                <input
-                                    type="number"
-                                    name="estimated_duration_minutes"
-                                    value={data.estimated_duration_minutes}
-                                    onChange={handleChange}
-                                    className="mt-2 w-full px-4 py-2 bg-white border rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                    placeholder="e.g., 120"
-                                    min="1"
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-end gap-3 pt-6 border-t">
+                            {/* Buttons */}
+                            <div className="flex gap-4 pt-6 border-t">
                                 <a
                                     href={route('surgical-case.index')}
-                                    className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50"
+                                    className="flex-1 text-center px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
                                 >
                                     Cancel
                                 </a>
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg text-sm hover:from-blue-700 hover:to-blue-600 disabled:opacity-50"
+                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                                 >
-                                    {processing ? 'Creating...' : 'Create Case'}
+                                    {processing ? 'Creating...' : 'Create Surgical Case'}
                                 </button>
                             </div>
                         </form>

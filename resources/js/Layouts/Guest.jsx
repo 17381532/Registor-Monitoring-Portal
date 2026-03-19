@@ -19,7 +19,7 @@ export default function Guest({ children, title = '' }) {
                     {children}
                 </div>
 
-                <p className="text-center text-xs text-gray-400">© {new Date().getFullYear()} MyApp. All rights reserved.</p>
+                <p className="text-center text-xs text-gray-400">© {new Date().getFullYear()} Register Monitoring Portal. All rights reserved.</p>
             </div>
         </div>
     );
