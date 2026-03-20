@@ -24,6 +24,18 @@ Route::middleware('auth')->group(function () {
         ->name('monitoring.download-backup');
 });
 
+Route::middleware('auth')->group(function () {
+    // ... existing routes ...
+    
+    // Advanced dashboard routes
+    Route::get('/monitoring/advanced-dashboard', [MonitoringLogController::class, 'advancedDashboard'])
+        ->name('monitoring.advanced-dashboard');
+    
+    // API endpoint for dashboard data
+    Route::get('/api/monitoring/dashboard-data', [MonitoringLogController::class, 'getDashboardData'])
+        ->name('api.monitoring.dashboard-data');
+});
+
 // Redirect dashboard to monitoring dashboard
 Route::get('/dashboard', function () {
     return redirect()->route('monitoring.dashboard');
