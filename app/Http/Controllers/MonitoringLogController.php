@@ -49,6 +49,12 @@ class MonitoringLogController extends Controller
             }
         }
 
+        // Check if export is requested
+        if ($request->has('export') && $request->export === 'all') {
+            $allData = $query->orderBy('monitoring_date', 'desc')->get();
+            return response()->json(['exportData' => $allData]);
+        }
+
         $logs = $query->orderBy('monitoring_date', 'desc')
             ->paginate(15)
             ->withQueryString();
@@ -99,7 +105,7 @@ class MonitoringLogController extends Controller
         // Add validation for SBAH Surgical Case
         if ($request->location === 'SBAH' && $request->system_type === 'Surgical Case') {
             $rules['backup_location'] = 'required|string|max:255';
-            $rules['backup_file'] = 'nullable|file|mimes:zip,sql,backup,bak,gz,tar,sqlite|max:102400'; // Added bak
+            $rules['backup_file'] = 'nullable|file|mimes:zip,sql,backup,bak,gz,tar,sqlite|max:102400';
             
             $messages = [
                 'backup_file.mimes' => 'The backup file must be a file of type: zip, sql, backup, bak, gz, tar, sqlite.',
@@ -113,14 +119,6 @@ class MonitoringLogController extends Controller
         // Handle file upload
         if ($request->hasFile('backup_file')) {
             $file = $request->file('backup_file');
-            
-            // Check file size
-            $maxSize = 100 * 1024 * 1024; // 100MB
-            if ($file->getSize() > $maxSize) {
-                return redirect()->back()
-                    ->withErrors(['backup_file' => sprintf('File size (%s) exceeds the 100MB limit.', $this->formatBytes($file->getSize()))])
-                    ->withInput();
-            }
             
             // Additional manual validation for file extension
             $extension = strtolower($file->getClientOriginalExtension());
@@ -148,12 +146,12 @@ class MonitoringLogController extends Controller
             $validated['backup_checksum'] = md5_file($file);
         }
 
-        // Add response time if available (simulate if not provided)
+        // Add response time if not provided (optional)
         if (!isset($validated['response_time_ms'])) {
-            $validated['response_time_ms'] = rand(50, 500);
+            $validated['response_time_ms'] = rand(50, 500); // Simulated response time
         }
 
-        // Add the authenticated user ID
+        // Add the authenticated user ID - this is crucial!
         $validated['user_id'] = auth()->id();
 
         // Create the monitoring log
@@ -197,7 +195,7 @@ class MonitoringLogController extends Controller
 
         if ($request->location === 'SBAH' && $request->system_type === 'Surgical Case') {
             $rules['backup_location'] = 'required|string|max:255';
-            $rules['backup_file'] = 'nullable|file|mimes:zip,sql,backup,bak,gz,tar,sqlite|max:102400'; // Added bak
+            $rules['backup_file'] = 'nullable|file|mimes:zip,sql,backup,bak,gz,tar,sqlite|max:102400';
             
             $messages = [
                 'backup_file.mimes' => 'The backup file must be a file of type: zip, sql, backup, bak, gz, tar, sqlite.',
@@ -605,6 +603,107 @@ class MonitoringLogController extends Controller
         }
 
         return redirect()->back()->with('success', 'Backup file verified successfully.');
+    }
+
+    /**
+     * Export monitoring logs to Excel/PDF
+     */
+    public function export(Request $request)
+    {
+        $query = MonitoringLog::query();
+
+        // Apply filters
+        if ($request->has('location') && $request->location) {
+            $query->where('location', $request->location);
+        }
+        if ($request->has('system_type') && $request->system_type) {
+            $query->where('system_type', $request->system_type);
+        }
+        if ($request->has('date_from') && $request->date_from) {
+            $query->whereDate('monitoring_date', '>=', $request->date_from);
+        }
+        if ($request->has('date_to') && $request->date_to) {
+            $query->whereDate('monitoring_date', '<=', $request->date_to);
+        }
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+
+        $data = $query->orderBy('monitoring_date', 'desc')->get();
+
+        $format = $request->get('format', 'excel');
+        $filename = 'monitoring_report_' . date('Y-m-d_H-i-s');
+
+        if ($format === 'excel') {
+            return $this->exportToExcel($data, $filename);
+        } elseif ($format === 'pdf') {
+            return $this->exportToPDF($data, $filename);
+        }
+
+        return response()->json(['error' => 'Invalid export format'], 400);
+    }
+
+    /**
+     * Export data to Excel
+     */
+    private function exportToExcel($data, $filename)
+    {
+        // Prepare data for Excel
+        $exportData = [];
+        foreach ($data as $item) {
+            $exportData[] = [
+                'Date/Time' => $item->monitoring_date,
+                'Location' => $item->location,
+                'System' => $item->system_type,
+                'Monitored By' => $item->monitored_by,
+                'Status' => strtoupper($item->status),
+                'Backup Location' => $item->backup_location ?? '-',
+                'Backup File' => $item->backup_file_name ?? '-',
+                'Backup Size' => $item->backup_file_size ? $this->formatBytes($item->backup_file_size) : '-',
+                'Response Time' => $item->response_time_ms ? $item->response_time_ms . 'ms' : '-',
+                'CPU Usage' => $item->cpu_usage ? $item->cpu_usage . '%' : '-',
+                'Memory Usage' => $item->memory_usage ? $item->memory_usage . '%' : '-',
+                'Disk Usage' => $item->disk_usage ? $item->disk_usage . '%' : '-',
+                'Notes' => $item->notes ?? '-',
+                'Created At' => $item->created_at,
+            ];
+        }
+
+        // Create Excel file using Laravel Excel (if installed) or return JSON
+        // For now, we'll return JSON that can be handled by the frontend
+        return response()->json([
+            'data' => $exportData,
+            'filename' => $filename,
+            'format' => 'excel'
+        ]);
+    }
+
+    /**
+     * Export data to PDF
+     */
+    private function exportToPDF($data, $filename)
+    {
+        // Prepare data for PDF
+        $exportData = [];
+        foreach ($data as $item) {
+            $exportData[] = [
+                'date' => $item->monitoring_date,
+                'location' => $item->location,
+                'system' => $item->system_type,
+                'monitored_by' => $item->monitored_by,
+                'status' => strtoupper($item->status),
+                'backup_location' => $item->backup_location ?? '-',
+                'backup_file' => $item->backup_file_name ?? '-',
+                'response_time' => $item->response_time_ms ? $item->response_time_ms . 'ms' : '-',
+                'notes' => $item->notes ?? '-',
+            ];
+        }
+
+        return response()->json([
+            'data' => $exportData,
+            'filename' => $filename,
+            'format' => 'pdf'
+        ]);
     }
 
     // Private helper methods

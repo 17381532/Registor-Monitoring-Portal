@@ -13,7 +13,7 @@ class MonitoringLog extends Model
     protected $table = 'monitoring_logs';
 
     protected $fillable = [
-        'user_id',
+          'user_id',
         'location',
         'system_type',
         'monitoring_date',
@@ -39,7 +39,8 @@ class MonitoringLog extends Model
         'response_time_ms' => 'integer',
         'cpu_usage' => 'integer',
         'memory_usage' => 'integer',
-        'disk_usage' => 'integer'
+        'disk_usage' => 'integer',
+        'deleted_at' => 'datetime'
     ];
 
     // Relationships
