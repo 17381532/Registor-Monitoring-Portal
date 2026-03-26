@@ -14,27 +14,12 @@ return new class extends Migration
             return;
         }
 
-        // Check if user_id column already exists
-        $hasUserId = false;
-        try {
-            $columns = DB::select("PRAGMA table_info(monitoring_logs)");
-            foreach ($columns as $column) {
-                if ($column->name === 'user_id') {
-                    $hasUserId = true;
-                    break;
-                }
-            }
-        } catch (\Exception $e) {
-            return;
-        }
-
         // Add user_id column if it doesn't exist
-        if (!$hasUserId) {
-            DB::statement('ALTER TABLE monitoring_logs ADD COLUMN user_id INTEGER NULL');
+        if (!Schema::hasColumn('monitoring_logs', 'user_id')) {
+            Schema::table('monitoring_logs', function (Blueprint $table) {
+                $table->integer('user_id')->nullable();
+            });
             echo "✓ Added user_id column\n";
-            
-            // Optional: Add foreign key constraint (SQLite doesn't support adding foreign keys after table creation easily)
-            // We'll skip the foreign key constraint for now
         } else {
             echo "✓ user_id column already exists\n";
         }

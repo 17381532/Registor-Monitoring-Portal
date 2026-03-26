@@ -113,6 +113,8 @@ class SurgicalCaseSeeder extends Seeder
             ],
         ];
 
-        SurgicalCase::insert($cases);
+        foreach ($cases as $case) {
+            SurgicalCase::updateOrCreate(['case_number' => $case['case_number']], $case);
+        }
     }
 }

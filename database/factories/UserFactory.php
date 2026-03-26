@@ -29,6 +29,11 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'employee_id' => 'EMP' . $this->faker->unique()->numberBetween(100, 999),
+            'department' => $this->faker->randomElement(['IT', 'Clinical', 'Administration', 'Maintenance']),
+            'phone_number' => $this->faker->phoneNumber(),
+            'shift' => $this->faker->randomElement(['Morning', 'Evening', 'Night']),
+            'is_active' => true,
         ];
     }
 

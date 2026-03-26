@@ -1,18 +1,22 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        // Add user_id column to monitoring_logs table
-        try {
-            DB::statement('ALTER TABLE monitoring_logs ADD COLUMN user_id INTEGER NULL');
+        // Add user_id column to monitoring_logs table if it doesn't exist
+        if (!Schema::hasColumn('monitoring_logs', 'user_id')) {
+            Schema::table('monitoring_logs', function (Blueprint $table) {
+                $table->integer('user_id')->nullable();
+            });
             echo "✓ Added user_id column\n";
-        } catch (\Exception $e) {
-            echo "Error: " . $e->getMessage() . "\n";
+        } else {
+            echo "✓ user_id column already exists\n";
         }
     }
 
